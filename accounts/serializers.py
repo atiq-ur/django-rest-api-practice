@@ -5,6 +5,7 @@ from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from rest_framework.exceptions import ErrorDetail, ValidationError
 
 from accounts.models import User
+from accounts.tasks import send_email_task
 from accounts.utils import Utils
 
 
@@ -84,7 +85,8 @@ class SendPasswordResetEmailSerializer(serializers.Serializer):
                 'body': body,
                 'email': user.email
             }
-            Utils.send_mail(data)
+            # Utils.send_mail(data)
+            send_email_task.delay(data)
             return attrs
         else:
             raise serializers.ValidationError('You are not a Registered User')
