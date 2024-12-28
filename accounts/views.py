@@ -4,7 +4,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from accounts.serializers import UserRegistrationSerializer, UserLoginSerializer, UserProfileSerializer, \
-    UserChangePasswordSerializer
+    UserChangePasswordSerializer, SendPasswordResetEmailSerializer, UserPasswordResetSerializer
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from accounts.renderers import JSONRenderer
@@ -87,6 +87,34 @@ class UserChangePasswordView(APIView):
         return Response(
             {
                 'message': 'Password Changed Successfully'
+            },
+            status=status.HTTP_200_OK
+        )
+
+class UserSendPasswordResetLinkView(APIView):
+    renderer_classes = [JSONRenderer]
+    def post(self, request):
+        serializer = SendPasswordResetEmailSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        return Response(
+            {
+                'message': 'Password Reset Link sent your emailSuccessfully'
+            },
+            status=status.HTTP_200_OK
+        )
+
+class UserPasswordResetView(APIView):
+    renderer_classes = [JSONRenderer]
+    def post(self, request, uid, token):
+        serializer = UserPasswordResetSerializer(
+            data=request.data,
+            context={'uid': uid, 'token': token}
+        )
+        serializer.is_valid(raise_exception=True)
+
+        return Response(
+            {
+                'message': 'Password changed successfully',
             },
             status=status.HTTP_200_OK
         )
